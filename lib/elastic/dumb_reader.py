@@ -10,19 +10,21 @@ def reader():
     and retrieves all tweets.
     """
 
-    def _reader(es):
+    def _reader(es, indices):
         for i in indices:
             yield from helpers.scan(es, index=i)
 
     # Assume elastic runs on localhost on the default port
     es = elasticsearch.Elasticsearch()
-    # select all indices that start with "logstash"
+    # logstash indices start with "logstash-" by default
     indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
+    # this can be used to gauge progress
+    total_num_tweets = sum(es.search(i)['hits']['total'] for i in indices)
 
-    yield _reader(es)
+    yield _reader(es, indices)
 
 
 if __name__ == '__main__':
     with reader() as r:
-        for line in r:
-            print(line)
+        for tweet in r:
+            print(tweet['_source'].get('message'))
