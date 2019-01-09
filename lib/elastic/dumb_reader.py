@@ -5,9 +5,9 @@ from elasticsearch import helpers
 
 
 @contextmanager
-def reader():
-    """This dumb reader iterates over all the logstash indices (one per date)
-    and retrieves all tweets.
+def get_reader():
+    """This generates a dumb reader which iterates over all the logstash indices
+    (one per date) and retrieves all tweets.
     """
 
     def _reader(es, indices):
@@ -25,6 +25,6 @@ def reader():
 
 
 if __name__ == '__main__':
-    with reader() as r:
+    with get_reader() as r:
         for tweet in r:
-            print(tweet['_source'].get('message'))
+            print(tweet)
