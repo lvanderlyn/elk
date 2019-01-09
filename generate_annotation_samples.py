@@ -27,8 +27,6 @@ def get_sample(n, k):
     with og_reader.get_reader() as r:
         tweets = list(r)
 
-    tweets.sort()
-    
     sample = random.sample(tweets, k)
 
     for tweet in sample:
