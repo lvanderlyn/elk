@@ -15,7 +15,7 @@ import random
 
 import docopt
 
-from lib.elastic import dumb_reader
+from lib.elastic import og_reader
 
 
 random.seed(42)
@@ -24,12 +24,30 @@ random.seed(42)
 def get_sample(n, k):
     random.seed(n)
 
-    with dumb_reader.reader() as r:
+    with og_reader.get_reader() as r:
         tweets = list(r)
+
+    tweets.sort()
     
     sample = random.sample(tweets, k)
 
-    return [(x['_id'], x['_source'].get('message')) for x in sample]
+    for tweet in sample:
+        try:
+            text = tweet['_source']['extended_tweet']['full_text']
+        except KeyError:
+            try:
+                text = tweet['_source']['extended_tweet']['text']
+            except KeyError:
+                try:
+                    text = tweet['_source']['message']
+                except KeyError:
+                    try:
+                        text = tweet['_source']['text']
+                    except KeyError:
+                        print(tweet)
+                        text = None
+
+        yield tweet['_index'], tweet['_id'], text
 
 
 if __name__ == '__main__':
