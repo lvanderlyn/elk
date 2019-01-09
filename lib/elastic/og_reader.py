@@ -27,6 +27,7 @@ def get_reader():
     es = elasticsearch.Elasticsearch()
     # logstash indices start with "logstash-" by default
     indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
+    indices.sort()
     # this can be used to gauge progress
     total_num_tweets = sum(es.search(i)['hits']['total'] for i in indices)
 
