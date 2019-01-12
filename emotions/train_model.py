@@ -77,7 +77,7 @@ model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accur
 earlystop = EarlyStopping(monitor='val_loss', min_delta=0, patience=3, verbose=0, mode='auto')
 
 model.fit(xtrain_pad, y=ytrain_enc, batch_size=512, epochs=500,
-          verbose=1, validation_data=(xvalid_pad, yvalid_enc), callbacks=[earlystop])  # accuracy 0.6929
+          verbose=1, validation_data=(xvalid_pad, yvalid_enc), callbacks=[earlystop])  # accuracy 0.7348 (stopped at epoch 19)
 
 # save the model
 model_json = model.to_json()
