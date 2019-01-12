@@ -31,6 +31,7 @@ es = Elasticsearch()
 indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
 labels = ['negative', 'positive']
 for i in indices:
+    print('index: ' + i)
     for tweet in helpers.scan(es, index=i):
         tweet_text = tweet['_source']['message']
 
@@ -43,4 +44,9 @@ for i in indices:
             # predicted value - index of the max value
             tonality = np.argmax(pred).item()
 
-            res = es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
+            try:
+                res = es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
+
+                print('message: ' + tweet_text + ', tonality: ' + labels[tonality])
+            except Exception as e:
+                print(e)
