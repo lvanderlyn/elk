@@ -33,7 +33,10 @@ labels = ['negative', 'positive']
 for i in indices:
     print('index: ' + i)
     for tweet in helpers.scan(es, index=i):
-        tweet_text = tweet['_source']['message']
+        if 'message' in tweet['_source']:
+            tweet_text = tweet['_source']['message']
+        else:
+            tweet_text = tweet['_source']['text']
 
         words = convert_text_to_index_array(tweet_text)
         words_pad = sequence.pad_sequences([words], maxlen=70)
