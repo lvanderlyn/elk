@@ -26,10 +26,14 @@ def convert_text_to_index_array(text):
     return word_indices
 
 
+# imitates keras tokenizer used during training
 def normalize_text(text):
-    return text.replace('don\'t', 'do not').replace('can\'t', 'can not').replace('hasn\'t', 'has not')\
-        .replace('couldn\'t', 'could not').replace('doesn\'t', 'does not').replace('wouldn\'t', 'would not')\
-        .replace('won\'t', 'will not').replace('shouldn\'t', 'should not')
+    text = text.lower()
+    filters = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
+    split = " "
+    for c in filters:
+        text = text.replace(c, split)
+    return text
 
 
 # def gen_data(tweets, index):
