@@ -50,7 +50,11 @@ def main(args):
     elif args['nb']:
         model = naive_bayes.train(features, labels)
 
-    print(decision_tree.get_visualization(model))
+    scores = cross_validate(model, features, labels, cv=10)
+    print(scores['train_score'])
+    print(scores['test_score'])
+
+    # print(decision_tree.get_visualization(model))
 
 
 if __name__ == '__main__':
