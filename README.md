@@ -20,7 +20,9 @@ an outside module (see emotion and partisanship folders).
 
 
 DIRECTORY ORGANISATION:
+
  Scripts:
+
 	* 2_classifier.py                -> classifies tweets as pro/anti-Brexit
 	                                    or neutral
 	* 3_topic_modeling.py            -> clusters tweets by topic
@@ -29,6 +31,7 @@ DIRECTORY ORGANISATION:
 	* generate_annotation_samples.py -> generates a random sample of tweets
 	                                    to be hand-annotated
  Directories:
+
 	* /emotions_model      -> contains code for training a model for
 	                          classifying emotions of tweet data. And
 	                          contains a saved trained model
