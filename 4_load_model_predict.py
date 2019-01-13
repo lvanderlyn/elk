@@ -29,7 +29,7 @@ def convert_text_to_index_array(text):
 # imitates keras tokenizer used during training
 def normalize_text(text):
     text = text.lower()
-    filters = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n',
+    filters = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
     split = " "
     for c in filters:
         text = text.replace(c, split)
