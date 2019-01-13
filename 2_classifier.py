@@ -9,6 +9,7 @@ Options:
 
 
 import docopt
+import elasticsearch
 import nltk
 from sklearn.model_selection import cross_validate
 
@@ -16,7 +17,7 @@ from lib.classifiers import decision_tree
 from lib.classifiers import naive_bayes
 
 
-def read_corpus(path):
+def read_corpus(lemmatizer, path):
     """Returns the tokenized corpus is a list and a numerical mapping
     for every word in the corpus.
     """
@@ -25,13 +26,29 @@ def read_corpus(path):
     with open(path) as handle:
         for line in handle:
             label, tweet = line.strip().split('\t')
-            tweet = eval(tweet)[2]
-            words = nltk.word_tokenize(tweet)
-            for word in words:
+            index, id, text = eval(tweet)
+
+            tokenized = nltk.word_tokenize(text.lower())
+            tagged = nltk.pos_tag(tokenized)
+            lemmatized = []
+            for word, tag in tagged:
+                try:
+                    lemma = lemmatizer.lemmatize(word, pos=tag[0].lower())
+                except:
+                    lemma = lemmatizer.lemmatize(word)
+                lemmatized.append(lemma)
+
+            lemmatized += get_bigrams(lemmatized)
+
+            for word in lemmatized:
                 if word not in dictionary:
                     dictionary[word] = len(dictionary)
-            corpus.append((words, label))
+            corpus.append((index, id, lemmatized, label))
     return corpus, dictionary
+
+
+def get_bigrams(seq):
+    return [tuple(seq[i:i+2]) for i in range(len(seq)-1)]
 
 
 def get_features(tweet, dictionary):
@@ -42,17 +59,36 @@ def get_features(tweet, dictionary):
     return [v for k, v in sorted(features.items())]
 
 
+def get_username(el, index, id):
+    x = el.get(index, '_all', id)
+    x = x['_source']['user']
+    if isinstance(x, str):
+        return x
+    else:
+        x['screen_name']
+
+
 def main(args):
-    corpus, dictionary = read_corpus(args['<corpus_path>'])
-    features, labels = zip(*[(get_features(tweet, dictionary), label) for tweet, label in corpus])
+    el = elasticsearch.Elasticsearch()
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+    raw_corpus, dictionary = read_corpus(lemmatizer, args['<corpus_path>'])
+    corpus = []
+    for tweet in raw_corpus:
+        index, id, words, label = tweet
+        username = get_username(el, index, id)
+        corpus.append((index, id, username, words, label))
+        if username not in dictionary:
+            dictionary[username] = len(dictionary)
+        
+    features, labels = zip(*[(get_features(tweet, dictionary), label) for index, id, username, tweet, label in corpus])
     if args['dt']:
         model = decision_tree.train(features, labels)
     elif args['nb']:
         model = naive_bayes.train(features, labels)
 
-    scores = cross_validate(model, features, labels, cv=10)
-    print(scores['train_score'])
-    print(scores['test_score'])
+    scores = cross_validate(model, features, labels, cv=10, return_train_score=True)
+    print(f"train_scores: {scores['train_score']}")
+    print(f"test_scores:  {scores['test_score']}")
 
     # print(decision_tree.get_visualization(model))
 
