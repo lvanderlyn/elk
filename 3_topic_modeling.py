@@ -29,7 +29,8 @@ def extract_text(tweet):
                     text = tweet['_source']['text']
                 except KeyError:
                     text = None
-    tokens = nltk.word_tokenize(tweet)
+
+    tokens = nltk.word_tokenize(text)
     return dictionary.doc2bow(tokens)
 
 
