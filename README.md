@@ -29,8 +29,9 @@ DIRECTORY ORGANISATION:
 	* generate_annotation_samples.py -> generates a random sample of tweets
 	                                    to be hand-annotated
  Directories:
-	* /emotions_model      -> contains code for classifying and labeling
-	                          emotions of tweet data in elastic search
+	* /emotions_model      -> contains code for training a model for
+	                          classifying emotions of tweet data. And
+	                          contains a saved trained model
 	* /partisanship        -> contains code related to classifying and 
 	                          labeling the authors side in the Brexit debate
 	* /config              -> contains configuration file for logstash 
