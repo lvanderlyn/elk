@@ -17,6 +17,5 @@ wrapt==1.11.0
 python==3.6
 tensorflow==1.12
 keras==2.2.4
-python elasticsearch client==6.3.1
 pandas==0.23.2
 tqdm==4.4.0
