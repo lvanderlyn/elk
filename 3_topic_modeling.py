@@ -12,9 +12,6 @@ import nltk
 from lib.elastic import og_reader
 
 
-dictionary = Dictionary()
-
-
 def extract_text(tweet):
     try:
         text = tweet['_source']['extended_tweet']['full_text']
@@ -29,13 +26,17 @@ def extract_text(tweet):
                     text = tweet['_source']['text']
                 except KeyError:
                     text = None
-    tokens = nltk.word_tokenize(tweet)
+    tokens = nltk.word_tokenize(text)
     return dictionary.doc2bow(tokens)
 
 
 def main(num_topics):
     with og_reader.get_reader() as r:
-        model = gensim.models.LdaMulticore((extract_text(x) for x in r), num_topics=num_topics)
+        tweets = [extract_text(tweet) for tweet in r]
+    dictionary = Dictionary(tweets)
+
+    with og_reader.get_reader() as r:
+        model = gensim.models.LdaMulticore((dictionary.doc2bow(tweet) for tweet in tweets), num_topics=num_topics)
     return model
 
 
