@@ -12,7 +12,7 @@ import numpy as np
 
 
 # load dictionary saved during training to use it for converting text to number vectors
-with open('dictionary.json', 'r') as dictionary_file:
+with open('emotions_model/dictionary.json', 'r') as dictionary_file:
     dictionary = json.load(dictionary_file)
 
 
@@ -27,29 +27,29 @@ def convert_text_to_index_array(text):
     return word_indices
 
 
-def gen_data(tweets, index):
-    for t in tweets:
-        yield {
-            '_index': index,
-            '_op_type': 'update',
-            '_type': 'doc',
-            '_id': t[0],
-            'doc': {'tonality': t[1]},
-        }
+# def gen_data(tweets, index):
+#     for t in tweets:
+#         yield {
+#             '_index': index,
+#             '_op_type': 'update',
+#             '_type': 'doc',
+#             '_id': t[0],
+#             'doc': {'tonality': t[1]},
+#         }
 
 
 def main():
     # load saved model
-    with open('model.json', 'r') as f:
+    with open('emotions_model/model.json', 'r') as f:
         loaded_model_json = f.read()
 
     model = model_from_json(loaded_model_json)
-    model.load_weights('model.h5')
+    model.load_weights('emotions_model/model.h5')
 
     es = Elasticsearch()
     indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
     labels = ['negative', 'positive']
-    updated_data = []
+    # updated_data = []
     for i in indices:
         print('index: ' + i)
         for tweet in helpers.scan(es, index=i):
@@ -75,16 +75,16 @@ def main():
 
                 # predicted value - index of the max value
                 tonality = np.argmax(pred).item()
-                updated_data.append((tweet['_id'], labels[tonality]))
+                # updated_data.append((tweet['_id'], labels[tonality]))
 
-                # try:
-                #     res = es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
-                #
-                #     print('message: ' + tweet_text + ', tonality: ' + labels[tonality])
-                # except Exception as e:
-                #     print(e)
+                try:
+                    es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
 
-        helpers.bulk(es, gen_data(updated_data, i))
+                    print('message: ' + tweet_text + ', tonality: ' + labels[tonality])
+                except Exception as e:
+                    print(e)
+
+        # helpers.bulk(es, gen_data(updated_data, i))
 
 
 if __name__ == '__main__':

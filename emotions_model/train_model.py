@@ -16,7 +16,27 @@ from keras.callbacks import EarlyStopping
 from keras.layers.recurrent import LSTM
 from keras.layers.embeddings import Embedding
 
-from emotions.utils import load_embeddings
+import os
+
+
+def load_embeddings():
+    # load pre-trained word embeddings (GloVe, twitter)
+    embeddings_index = {}
+    for fn in os.listdir('glove.twitter.27B'):
+        with open('glove.twitter.27B/' + fn) as f:
+            for line in f:
+                values = line.split()
+                word = values[0]
+
+                try:
+                    coefs = np.asarray(values[1:], dtype='float32')
+                except:
+                    pass
+
+                embeddings_index[word] = coefs
+
+    return embeddings_index
+
 
 # load test and training data
 train_data = pd.read_csv("train.csv", encoding='latin-1')
