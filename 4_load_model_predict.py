@@ -10,7 +10,6 @@ from keras.preprocessing import text as txt, sequence
 from keras.models import model_from_json
 import numpy as np
 
-
 # load dictionary saved during training to use it for converting text to number vectors
 with open('emotions_model/dictionary.json', 'r') as dictionary_file:
     dictionary = json.load(dictionary_file)
@@ -25,6 +24,16 @@ def convert_text_to_index_array(text):
         else:
             print("'%s' not in training corpus; ignoring." % word)
     return word_indices
+
+
+# imitates keras tokenizer used during training
+def normalize_text(text):
+    text = text.lower()
+    filters = '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n'
+    split = " "
+    for c in filters:
+        text = text.replace(c, split)
+    return text
 
 
 # def gen_data(tweets, index):
@@ -50,39 +59,41 @@ def main():
     indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
     labels = ['negative', 'positive']
     # updated_data = []
-    for i in indices:
-        print('index: ' + i)
-        for tweet in helpers.scan(es, index=i):
-            try:
-                tweet_text = tweet['_source']['extended_tweet']['full_text']
-            except KeyError:
+    try:
+        for i in indices:
+            print('index: ' + i)
+            for tweet in helpers.scan(es, index=i):
                 try:
-                    tweet_text = tweet['_source']['extended_tweet']['text']
+                    tweet_text = tweet['_source']['extended_tweet']['full_text']
                 except KeyError:
                     try:
-                        tweet_text = tweet['_source']['message']
+                        tweet_text = tweet['_source']['extended_tweet']['text']
                     except KeyError:
                         try:
-                            tweet_text = tweet['_source']['text']
+                            tweet_text = tweet['_source']['message']
                         except KeyError:
-                            tweet_text = None
+                            try:
+                                tweet_text = tweet['_source']['text']
+                            except KeyError:
+                                tweet_text = None
 
-            words = convert_text_to_index_array(tweet_text)
-            words_pad = sequence.pad_sequences([words], maxlen=70)
+                tweet_text = normalize_text(tweet_text)
+                words = convert_text_to_index_array(tweet_text)
+                words_pad = sequence.pad_sequences([words], maxlen=70)
 
-            if len(words) > 0:
-                pred = model.predict(words_pad)
+                if len(words) > 0:
+                    pred = model.predict(words_pad)
 
-                # predicted value - index of the max value
-                tonality = np.argmax(pred).item()
-                # updated_data.append((tweet['_id'], labels[tonality]))
+                    # predicted value - index of the max value
+                    tonality = np.argmax(pred).item()
+                    # updated_data.append((tweet['_id'], labels[tonality]))
 
-                try:
                     es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
 
                     print('message: ' + tweet_text + ', tonality: ' + labels[tonality])
-                except Exception as e:
-                    print(e)
+
+    except Exception as e:
+        print(e)
 
         # helpers.bulk(es, gen_data(updated_data, i))
 
