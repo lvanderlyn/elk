@@ -12,7 +12,7 @@ into JSON and stored in our elasticsearch instance.
 
 Our goal with this project was to analyze the tweets to determine if we could
 classify the emotion and partisanship (pro-Brexit, anti-Brexit, or neutral) of
-the writer.
+the writer as well as the main arguments (both for and against used).
 
 To accomplish this, we query elastic search for a random sample of tweets
 (generate_annotation_samples.py) to hand-annotate and perform classification as
