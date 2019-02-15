@@ -46,7 +46,10 @@ def main():
 
     es = Elasticsearch()
     indices = [x for x in es.indices.get_mapping().keys() if x.startswith('logstash')]
-    labels = ['negative', 'positive']
+    labels = ['anger', 'enthusiasm', 'fun', 'happiness', 'hate', 'neutral', 'sadness', 'surprise',
+              'worry', 'love', 'boredom', 'worry', 'relief', 'empty']
+    labels = sorted(labels)
+
     try:
         for i in indices:
             print('index: ' + i)
@@ -75,7 +78,7 @@ def main():
                     # predicted value - index of the max value
                     tonality = np.argmax(pred).item()
 
-                    es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality': labels[tonality]}})
+                    es.update(index=i, doc_type="doc", id=tweet['_id'], body={'doc': {'tonality_13': labels[tonality]}})
 
                     print('message: ' + tweet_text + ', tonality: ' + labels[tonality])
 
