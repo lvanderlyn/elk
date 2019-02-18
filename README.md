@@ -44,3 +44,23 @@ DIRECTORY ORGANISATION:
 	* /lib/classifiers   -> contains the machine learning classifiers used
 	                        classifying partisanship and topics
 
+ Work in Kibana:
+ 
+   * Generating bar graph:
+     * Used count() functionality to count the number of posts by user.keyword
+     * Graphhed counts/user
+   * Generating word cloud:
+     * Made a word cloud of most common hashtags
+     * Explored filtering by user and by content of tweet
+   * Generating sentiment Pie charts:
+     * Added sentiment data we calculated to elasticsearch then plotted
+       percent postive/negative
+     * Explored how this changed between specific users (those who posted a lot)
+     * Explored how this changed for tweets containing specific words 
+       ("hate", "remain", "leave", "pain", etc)
+     * Tried to plot top 100 posters, but had trouble because of elasticsearch's 
+       weakness with aggregation
+   * Generated Timelion graphic for post counts
+     * Plotted number of posts against time for the period we collected data
+   * Generated Dashboard from visualisations
+     * Explored fuzzy search and full text search and proximity search
